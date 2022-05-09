@@ -30,13 +30,14 @@ void draw() {
       
       long lastTime = times.get(times.size() - 1);
       fill(0);
+      text(("Trial:" + (times.size() + errors) + "/30"), 10,90);
       text(lastTime + " ms", 10, 110);
     }
   } else {
     text("Press space to start!", 10, 40);
     
     if (!times.isEmpty()) {
-      // we have some experiment results
+      // we have some experiment results#
       text("Count: " + times.size(), 10, 60);
       text("Mean: " + Math.round(getMean(times)) + " ms", 10, 80);
       text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 100);
@@ -57,15 +58,15 @@ void keyPressed() {
     if (stimulusIsVisible) {
       // record reaction time
       recordStimulusReactionTime();
-      if(times.size() + errors = 30){
-      stopExperiment()  
+      if(times.size() + errors == 30){
+      stopExperiment();
       }
       // start next trial
       startTestTrial();
     } else {
       errors++;
-      if(times.size() + errors = 30){
-      stopExperiment()  
+      if(times.size() + errors == 30){
+      stopExperiment();
       }
       startTestTrial();
     }
