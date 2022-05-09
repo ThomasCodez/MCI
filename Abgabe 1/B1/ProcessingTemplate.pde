@@ -18,7 +18,6 @@ void setup() {
   size(500,500);
   pixelDensity(displayDensity());
   frameRate(60);
-  background(255);
 }
 
 double getMean(ArrayList<Long> data) {
@@ -58,8 +57,8 @@ void startExperiment() {
   experimentActive = true;
   lastUpdateTime = System.currentTimeMillis();
   startTestTrial();
-  circle(random(50,450), random(50,450), 100);
-  fill(0);
+  xpos = random(50,450);
+  ypos = random(50,450);
 }
 
 void updateExperiment() {
@@ -79,8 +78,11 @@ void stopExperiment() {
   experimentActive = false;
 }
 
+
+float xpos;
+float ypos;
 void draw() {
-  //background(255); // clear to white
+  background(255); // clear to white
   fill(0); // fill with black
   noStroke();
   
@@ -92,6 +94,8 @@ void draw() {
   if (experimentActive) {
     text("Press space when the color changes! Press 'a' for results!", 10, 40);
     updateExperiment();
+    circle(xpos, ypos, 100);
+    fill(0);
     // show previous time if available
     if (!times.isEmpty()) {
       long lastTime = times.get(times.size() - 1);
