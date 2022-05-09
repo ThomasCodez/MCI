@@ -20,7 +20,7 @@ void draw() {
   textSize(16);
   
   if (experimentActive) {
-    text("Press space when the color changes! Press 'a' for results!", 10, 40);
+    text("Press space when the circle appears! Press 'a' for results!", 10, 40);
     updateExperiment();
     fill(255, 255, colorCircle);
     if(stimulusIsVisible){
