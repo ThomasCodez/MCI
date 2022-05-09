@@ -21,7 +21,9 @@ void draw() {
     text("Press space when the color changes! Press 'a' for results!", 10, 40);
     updateExperiment();
     fill(255, 255, colorCircle);
-    colorCircle--;
+    if(stimulusIsVisible){
+      colorCircle--;
+    }
     circle(xpos, ypos, 100);
     // show previous time if available
     if (!times.isEmpty()) {
@@ -98,6 +100,10 @@ void startTestTrial() {
   stimulusIsVisible = false;
   float timeToWaitInSeconds = random(2, 6);
   testStimulusTimeout = (long) (timeToWaitInSeconds * 1000);
+  
+  xpos = random(50,450);
+  ypos = random(50,450);
+  colorCircle = 255;
 }
 
 void showStimulus() {
@@ -119,9 +125,6 @@ void startExperiment() {
   experimentActive = true;
   lastUpdateTime = System.currentTimeMillis();
   startTestTrial();
-  xpos = random(50,450);
-  ypos = random(50,450);
-  colorCircle = 255;
 }
 
 void updateExperiment() {
