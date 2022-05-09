@@ -59,6 +59,7 @@ void startExperiment() {
   startTestTrial();
   xpos = random(50,450);
   ypos = random(50,450);
+  colorCircle = 255;
 }
 
 void updateExperiment() {
@@ -81,6 +82,7 @@ void stopExperiment() {
 
 float xpos;
 float ypos;
+float colorCircle;
 void draw() {
   background(255); // clear to white
   fill(0); // fill with black
@@ -94,8 +96,9 @@ void draw() {
   if (experimentActive) {
     text("Press space when the color changes! Press 'a' for results!", 10, 40);
     updateExperiment();
+    fill(255, 255, colorCircle);
+    colorCircle--;
     circle(xpos, ypos, 100);
-    fill(0);
     // show previous time if available
     if (!times.isEmpty()) {
       long lastTime = times.get(times.size() - 1);
@@ -136,4 +139,5 @@ void keyPressed() {
   } else if (key == 'b') {
     // ...
   }
+
 }
