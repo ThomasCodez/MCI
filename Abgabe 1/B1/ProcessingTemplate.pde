@@ -1,5 +1,7 @@
+import java.util.Iterator;
+
 void setup() {
-  size(500,500);
+  fullScreen();
   pixelDensity(displayDensity());
   frameRate(60);
 }
@@ -41,6 +43,7 @@ void draw() {
       text("Count: " + times.size(), 10, 60);
       text("Mean: " + Math.round(getMean(times)) + " ms", 10, 80);
       text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 100);
+      text("Corr: " + getCorrelation(times, distances), 10,140);
       text("Errors: " + errors, 10, 120);
     }
   }
@@ -58,6 +61,7 @@ void keyPressed() {
     if (stimulusIsVisible) {
       // record reaction time
       recordStimulusReactionTime();
+      
       if(times.size() + errors == 30){
       stopExperiment();
       }
@@ -97,6 +101,8 @@ long testStimulusTimeout = -1;
 // recorded reaction times in milliseconds
 ArrayList<Long> times = new ArrayList();
 
+ArrayList<Long> distances = new ArrayList();
+
 double getMean(ArrayList<Long> data) {
   double sum = 0;
   for (long value : data) sum += value;
@@ -108,6 +114,15 @@ double getStandardDeviation(ArrayList<Long> data) {
   for (long value : data) squareSum += Math.pow(value - mean, 2);
   return Math.sqrt(squareSum / data.size());
 }
+
+void addDistance(){
+ float deltaX = xpos - displayWidth;
+ float deltaY = ypos - displayHeight;
+ double distance = Math.pow(deltaX, 2) + Math.pow(deltaY, 2);
+ distance = Math.sqrt(distance);
+ distances.add((long) distance);
+}
+
 
 void startTestTrial() {
   stimulusIsVisible = false;
@@ -124,9 +139,25 @@ void showStimulus() {
   stimulusTimestamp = System.currentTimeMillis();
 }
 
+double getCorrelation(ArrayList<Long> times, ArrayList<Long> distances){
+   double timesMean = getMean(times);
+   double distanceMean = getMean(distances);
+   double timesSTD = getStandardDeviation(times);
+   double distanceSTD = getStandardDeviation(distances);
+   Iterator<Long> timeIterator = times.iterator();
+   Iterator<Long> distanceIterator = distances.iterator();
+   double cov = 0;
+   while(distanceIterator.hasNext() && timeIterator.hasNext()){
+     cov = cov + (((double) distanceIterator.next() - distanceMean) * ((double) timeIterator.next() - timesMean));
+   }
+   cov = cov / times.size();
+   return cov / (timesSTD * distanceSTD);
+}
+
 void recordStimulusReactionTime() {
   long deltaTime = System.currentTimeMillis() - stimulusTimestamp;
   times.add(deltaTime);
+  addDistance();
 }
 
 // last time the experiment was updated.
@@ -135,6 +166,7 @@ long lastUpdateTime;
 
 void startExperiment() {
   times.clear();
+  distances.clear();
   experimentActive = true;
   lastUpdateTime = System.currentTimeMillis();
   startTestTrial();
