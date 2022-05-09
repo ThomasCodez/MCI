@@ -15,9 +15,10 @@ long testStimulusTimeout = -1;
 ArrayList<Long> times = new ArrayList();
 
 void setup() {
-  size(620, 200);
+  size(500,500);
   pixelDensity(displayDensity());
   frameRate(60);
+  background(255);
 }
 
 double getMean(ArrayList<Long> data) {
@@ -57,6 +58,8 @@ void startExperiment() {
   experimentActive = true;
   lastUpdateTime = System.currentTimeMillis();
   startTestTrial();
+  circle(random(50,450), random(50,450), 100);
+  fill(0);
 }
 
 void updateExperiment() {
@@ -77,7 +80,7 @@ void stopExperiment() {
 }
 
 void draw() {
-  background(255); // clear to white
+  //background(255); // clear to white
   fill(0); // fill with black
   noStroke();
   
@@ -89,15 +92,6 @@ void draw() {
   if (experimentActive) {
     text("Press space when the color changes! Press 'a' for results!", 10, 40);
     updateExperiment();
-    
-    if (stimulusIsVisible) {
-      fill(#ff0000);
-    } else {
-      fill(#000000);
-    }
-    rect(10, 60, 600, 40);
-    fill(0);
-    
     // show previous time if available
     if (!times.isEmpty()) {
       long lastTime = times.get(times.size() - 1);
