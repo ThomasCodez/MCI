@@ -1,84 +1,8 @@
-// if true, the experiment is currently active
-boolean experimentActive = false;
-
-// if true, the stimulus is currently visible
-boolean stimulusIsVisible = false;
-
-// timestamp at which the stimulus last appeared (in milliseconds since program start)
-long stimulusTimestamp;
-
-// timeout where, if it reaches 0, the stimulus will appear. In milliseconds.
-// will be ignored if negative
-long testStimulusTimeout = -1;
-
-// recorded reaction times in milliseconds
-ArrayList<Long> times = new ArrayList();
-
 void setup() {
   size(500,500);
   pixelDensity(displayDensity());
   frameRate(60);
 }
-
-double getMean(ArrayList<Long> data) {
-  double sum = 0;
-  for (long value : data) sum += value;
-  return sum / data.size();
-}
-double getStandardDeviation(ArrayList<Long> data) {
-  double mean = getMean(data);
-  double squareSum = 0;
-  for (long value : data) squareSum += Math.pow(value - mean, 2);
-  return Math.sqrt(squareSum / data.size());
-}
-
-void startTestTrial() {
-  stimulusIsVisible = false;
-  float timeToWaitInSeconds = random(2, 6);
-  testStimulusTimeout = (long) (timeToWaitInSeconds * 1000);
-}
-
-void showStimulus() {
-  stimulusIsVisible = true;
-  stimulusTimestamp = System.currentTimeMillis();
-}
-
-void recordStimulusReactionTime() {
-  long deltaTime = System.currentTimeMillis() - stimulusTimestamp;
-  times.add(deltaTime);
-}
-
-// last time the experiment was updated.
-// used to calculate elapsed time
-long lastUpdateTime;
-
-void startExperiment() {
-  times.clear();
-  experimentActive = true;
-  lastUpdateTime = System.currentTimeMillis();
-  startTestTrial();
-  xpos = random(50,450);
-  ypos = random(50,450);
-  colorCircle = 255;
-}
-
-void updateExperiment() {
-  long deltaTime = System.currentTimeMillis() - lastUpdateTime;
-  lastUpdateTime = System.currentTimeMillis();
-  
-  if (testStimulusTimeout > 0) {
-    testStimulusTimeout -= deltaTime;
-    if (testStimulusTimeout <= 0) showStimulus();
-  }
-}
-
-void stopExperiment() {
-  // cancel any ongoing tests
-  stimulusTimestamp = -1;
-  stimulusIsVisible = false;
-  experimentActive = false;
-}
-
 
 float xpos;
 float ypos;
@@ -140,4 +64,79 @@ void keyPressed() {
     // ...
   }
 
+}
+
+// if true, the experiment is currently active
+boolean experimentActive = false;
+
+// if true, the stimulus is currently visible
+boolean stimulusIsVisible = false;
+
+// timestamp at which the stimulus last appeared (in milliseconds since program start)
+long stimulusTimestamp;
+
+// timeout where, if it reaches 0, the stimulus will appear. In milliseconds.
+// will be ignored if negative
+long testStimulusTimeout = -1;
+
+// recorded reaction times in milliseconds
+ArrayList<Long> times = new ArrayList();
+
+double getMean(ArrayList<Long> data) {
+  double sum = 0;
+  for (long value : data) sum += value;
+  return sum / data.size();
+}
+double getStandardDeviation(ArrayList<Long> data) {
+  double mean = getMean(data);
+  double squareSum = 0;
+  for (long value : data) squareSum += Math.pow(value - mean, 2);
+  return Math.sqrt(squareSum / data.size());
+}
+
+void startTestTrial() {
+  stimulusIsVisible = false;
+  float timeToWaitInSeconds = random(2, 6);
+  testStimulusTimeout = (long) (timeToWaitInSeconds * 1000);
+}
+
+void showStimulus() {
+  stimulusIsVisible = true;
+  stimulusTimestamp = System.currentTimeMillis();
+}
+
+void recordStimulusReactionTime() {
+  long deltaTime = System.currentTimeMillis() - stimulusTimestamp;
+  times.add(deltaTime);
+}
+
+// last time the experiment was updated.
+// used to calculate elapsed time
+long lastUpdateTime;
+
+void startExperiment() {
+  times.clear();
+  experimentActive = true;
+  lastUpdateTime = System.currentTimeMillis();
+  startTestTrial();
+  xpos = random(50,450);
+  ypos = random(50,450);
+  colorCircle = 255;
+}
+
+void updateExperiment() {
+  long deltaTime = System.currentTimeMillis() - lastUpdateTime;
+  lastUpdateTime = System.currentTimeMillis();
+  
+  if (testStimulusTimeout > 0) {
+    testStimulusTimeout -= deltaTime;
+    if (testStimulusTimeout <= 0) showStimulus();
+  }
+}
+
+void stopExperiment() {
+  // cancel any ongoing tests
+  stimulusTimestamp = -1;
+  stimulusIsVisible = false;
+  experimentActive = false;
 }
