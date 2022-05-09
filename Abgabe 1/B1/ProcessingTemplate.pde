@@ -27,7 +27,9 @@ void draw() {
     circle(xpos, ypos, 100);
     // show previous time if available
     if (!times.isEmpty()) {
+      
       long lastTime = times.get(times.size() - 1);
+      fill(0);
       text(lastTime + " ms", 10, 110);
     }
   } else {
@@ -38,10 +40,11 @@ void draw() {
       text("Count: " + times.size(), 10, 60);
       text("Mean: " + Math.round(getMean(times)) + " ms", 10, 80);
       text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 100);
+      text("Errors: " + errors, 10, 120);
     }
   }
 }
-
+  int errors;
 void keyPressed() {
   if (key == ' ') {
     // the user pressed the space key
@@ -54,7 +57,16 @@ void keyPressed() {
     if (stimulusIsVisible) {
       // record reaction time
       recordStimulusReactionTime();
+      if(times.size() + errors = 30){
+      stopExperiment()  
+      }
       // start next trial
+      startTestTrial();
+    } else {
+      errors++;
+      if(times.size() + errors = 30){
+      stopExperiment()  
+      }
       startTestTrial();
     }
   } else if (key == 'a') {
@@ -125,6 +137,7 @@ void startExperiment() {
   experimentActive = true;
   lastUpdateTime = System.currentTimeMillis();
   startTestTrial();
+  errors = 0;
 }
 
 void updateExperiment() {
