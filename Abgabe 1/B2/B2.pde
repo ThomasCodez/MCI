@@ -55,7 +55,7 @@ void draw() {
   textSize(16);
   
   if (experimentActive) {
-    text("Press space when the circle appears!", 10, 40);
+    text("only Press Space when a Triangle appears!", 10, 40);
     updateExperiment();
     if(stimulusIsVisible){
       if(isRed){
@@ -69,13 +69,17 @@ void draw() {
       triangle(xpos,ypos,xpos + triangleLength, ypos, xpos + (0.5 * triangleLength), ypos - triangleHeight);
       }
       
-      if(System.currentTimeMillis() - stimulusTimestamp > 5000){
+      if(System.currentTimeMillis() - stimulusTimestamp > 3000){
         if(!isCircle){
           errors++;
         } else {
           noAction++;
         }
-         startTestTrial(); //Start next iteration if more than 5 sec passed without user input
+        print(noAction);
+        if(times.size() + errors + noAction == 30){
+        stopExperiment();
+        }
+         startTestTrial(); //Start next iteration if more than 3 sec passed without user input
       }
       
     }
@@ -95,8 +99,8 @@ void draw() {
       text("Count: " + times.size(), 10, 60);
       text("Mean: " + Math.round(getMean(times)) + " ms", 10, 80);
       text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 100);
-      text("Error-Rate: " + errors/ (times.size() + noAction), 10, 120);
-      text("Median: " + getMedian(times), 10, 160);
+      text("Error-Rate: " + (errors/ (times.size() + noAction)) * 100 + "%", 10, 120);
+      text("Median: " + getMedian(times) + "ms", 10, 160);
      
     }
   }
@@ -115,7 +119,7 @@ void keyPressed() {
       // record reaction time
       recordData();
       
-      if(times.size() + errors == 30){
+      if(times.size() + errors + noAction == 30){
       stopExperiment();
       }
       // start next trial
@@ -164,12 +168,11 @@ void startTestTrial() {
   Random random = new Random();
   isCircle = random.nextBoolean();
   isRed = random.nextBoolean();
-  xpos = random(100, displayWidth - 100);
-  ypos = random(100, displayHeight - 100);
+  xpos = random(150, displayWidth - 150);
+  ypos = random(150, displayHeight - 150);
   size = random(100,300);
   triangleLength = size;
   triangleHeight = size;
-  print("Size: " + size + " Len: " + triangleLength + " Height: " + triangleHeight);
 }
 
 void showStimulus() {
