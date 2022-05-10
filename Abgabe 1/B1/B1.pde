@@ -1,4 +1,33 @@
 import java.util.Iterator;
+import java.util.Collections;
+
+float xpos;
+float ypos;
+float colorCircle;
+int errors;
+PrintWriter outputFile;
+
+// if true, the experiment is currently active
+boolean experimentActive = false;
+
+// if true, the stimulus is currently visible
+boolean stimulusIsVisible = false;
+
+// timestamp at which the stimulus last appeared (in milliseconds since program start)
+long stimulusTimestamp;
+
+// timeout where, if it reaches 0, the stimulus will appear. In milliseconds.
+// will be ignored if negative
+long testStimulusTimeout = -1;
+
+// recorded reaction times in milliseconds
+ArrayList<Long> times = new ArrayList();
+
+ArrayList<Long> distances = new ArrayList();
+
+// last time the experiment was updated.
+// used to calculate elapsed time
+long lastUpdateTime;
 
 void setup() {
   fullScreen();
@@ -6,9 +35,7 @@ void setup() {
   frameRate(60);
 }
 
-float xpos;
-float ypos;
-float colorCircle;
+
 void draw() {
   background(255); // clear to white
   fill(0); // fill with black
@@ -20,7 +47,7 @@ void draw() {
   textSize(16);
   
   if (experimentActive) {
-    text("Press space when the circle appears! Press 'a' for results!", 10, 40);
+    text("Press space when the circle appears!", 10, 40);
     updateExperiment();
     fill(255, 255, colorCircle);
     if(stimulusIsVisible){
@@ -37,18 +64,21 @@ void draw() {
     }
   } else {
     text("Press space to start!", 10, 40);
-    
+    // we have some experiment results#
     if (!times.isEmpty()) {
-      // we have some experiment results#
+      writeResultsToFile();
+      
       text("Count: " + times.size(), 10, 60);
       text("Mean: " + Math.round(getMean(times)) + " ms", 10, 80);
       text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 100);
-      text("Corr: " + getCorrelation(times, distances), 10,140);
       text("Errors: " + errors, 10, 120);
+      text("Corr: " + getCorrelation(times, distances), 10,140);
+      text("Median: " + getMedian(times), 10, 160);
+     
     }
   }
 }
-  int errors;
+
 void keyPressed() {
   if (key == ' ') {
     // the user pressed the space key
@@ -85,24 +115,6 @@ void keyPressed() {
 
 }
 
-// if true, the experiment is currently active
-boolean experimentActive = false;
-
-// if true, the stimulus is currently visible
-boolean stimulusIsVisible = false;
-
-// timestamp at which the stimulus last appeared (in milliseconds since program start)
-long stimulusTimestamp;
-
-// timeout where, if it reaches 0, the stimulus will appear. In milliseconds.
-// will be ignored if negative
-long testStimulusTimeout = -1;
-
-// recorded reaction times in milliseconds
-ArrayList<Long> times = new ArrayList();
-
-ArrayList<Long> distances = new ArrayList();
-
 double getMean(ArrayList<Long> data) {
   double sum = 0;
   for (long value : data) sum += value;
@@ -123,14 +135,18 @@ void addDistance(){
  distances.add((long) distance);
 }
 
+long getMedian(ArrayList<Long> times){
+  Collections.sort(times);
+  return times.get((int) Math.floor(times.size() / 2));
+}
 
 void startTestTrial() {
   stimulusIsVisible = false;
   float timeToWaitInSeconds = random(2, 6);
   testStimulusTimeout = (long) (timeToWaitInSeconds * 1000);
   
-  xpos = random(50,450);
-  ypos = random(50,450);
+  xpos = random(100,displayWidth - 100);
+  ypos = random(100,displayHeight - 100);
   colorCircle = 255;
 }
 
@@ -160,17 +176,14 @@ void recordStimulusReactionTime() {
   addDistance();
 }
 
-// last time the experiment was updated.
-// used to calculate elapsed time
-long lastUpdateTime;
-
 void startExperiment() {
   times.clear();
   distances.clear();
   experimentActive = true;
+  outputFile = createWriter("results.txt");
+  errors = 0;
   lastUpdateTime = System.currentTimeMillis();
   startTestTrial();
-  errors = 0;
 }
 
 void updateExperiment() {
@@ -188,4 +201,18 @@ void stopExperiment() {
   stimulusTimestamp = -1;
   stimulusIsVisible = false;
   experimentActive = false;
+}
+
+void writeResultsToFile(){
+  int counter = 1;
+  Iterator<Long> timesIterator = times.iterator();
+  Iterator<Long> distancesIterator = distances.iterator();
+  outputFile.println("iteration  " + "time  " + "distance");
+  
+  while(timesIterator.hasNext() && distancesIterator.hasNext()){
+    outputFile.println(counter + "  " + timesIterator.next() + "  " + distancesIterator.next());
+    counter++;
+  }
+  outputFile.flush();
+  outputFile.close();
 }
