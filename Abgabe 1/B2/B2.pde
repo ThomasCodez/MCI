@@ -1,10 +1,10 @@
 import java.util.Iterator;
 import java.util.Collections;
+import java.util.Random;
 
-float xpos;
-float ypos;
-float colorCircle;
+
 int errors;
+int noAction;
 PrintWriter outputFile;
 
 // if true, the experiment is currently active
@@ -22,12 +22,20 @@ long testStimulusTimeout = -1;
 
 // recorded reaction times in milliseconds
 ArrayList<Long> times = new ArrayList();
-
-ArrayList<Long> distances = new ArrayList();
+ArrayList<String> colors = new ArrayList();
+ArrayList<String> shapes = new ArrayList();
 
 // last time the experiment was updated.
 // used to calculate elapsed time
 long lastUpdateTime;
+
+boolean isCircle;
+boolean isRed;
+float xpos;
+float ypos;
+float size;
+float triangleHeight;
+float triangleLength;
 
 void setup() {
   fullScreen();
@@ -49,17 +57,33 @@ void draw() {
   if (experimentActive) {
     text("Press space when the circle appears!", 10, 40);
     updateExperiment();
-    fill(255, 255, colorCircle);
     if(stimulusIsVisible){
-      colorCircle--;
+      if(isRed){
+      fill(255,0,0); 
+      } else{
+      fill(255,255,0);  
+      }
+      if(isCircle){
+      circle(xpos,ypos,size); // size = 2*pi*radius
+      } else {
+      triangle(xpos,ypos,xpos + triangleLength, ypos, xpos + (0.5 * triangleLength), ypos - triangleHeight);
+      }
+      
+      if(System.currentTimeMillis() - stimulusTimestamp > 5000){
+        if(!isCircle){
+          errors++;
+        } else {
+          noAction++;
+        }
+         startTestTrial(); //Start next iteration if more than 5 sec passed without user input
+      }
+      
     }
-    circle(xpos, ypos, 100);
     // show previous time if available
     if (!times.isEmpty()) {
-      
       long lastTime = times.get(times.size() - 1);
       fill(0);
-      text(("Trial:" + (times.size() + errors) + "/30"), 10,90);
+      text(("Trial:" + (times.size() + errors + noAction) + "/30"), 10,90);
       text(lastTime + " ms", 10, 110);
     }
   } else {
@@ -71,8 +95,7 @@ void draw() {
       text("Count: " + times.size(), 10, 60);
       text("Mean: " + Math.round(getMean(times)) + " ms", 10, 80);
       text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 100);
-      text("Errors: " + errors, 10, 120);
-      text("Corr: " + getCorrelation(times, distances), 10,140);
+      text("Error-Rate: " + errors/ (times.size() + noAction), 10, 120);
       text("Median: " + getMedian(times), 10, 160);
      
     }
@@ -88,16 +111,16 @@ void keyPressed() {
       return;
     }
     
-    if (stimulusIsVisible) {
+    if (stimulusIsVisible && !isCircle) {
       // record reaction time
-      recordStimulusReactionTime();
+      recordData();
       
       if(times.size() + errors == 30){
       stopExperiment();
       }
       // start next trial
       startTestTrial();
-    } else {
+    } else { 
       errors++;
       if(times.size() + errors == 30){
       stopExperiment();
@@ -127,13 +150,7 @@ double getStandardDeviation(ArrayList<Long> data) {
   return Math.sqrt(squareSum / data.size());
 }
 
-void addDistance(){
- float deltaX = xpos - displayWidth;
- float deltaY = ypos - displayHeight;
- double distance = Math.pow(deltaX, 2) + Math.pow(deltaY, 2);
- distance = Math.sqrt(distance);
- distances.add((long) distance);
-}
+
 
 long getMedian(ArrayList<Long> times){
   Collections.sort(times);
@@ -144,10 +161,15 @@ void startTestTrial() {
   stimulusIsVisible = false;
   float timeToWaitInSeconds = random(2, 6);
   testStimulusTimeout = (long) (timeToWaitInSeconds * 1000);
-  
-  xpos = random(100,displayWidth - 100);
-  ypos = random(100,displayHeight - 100);
-  colorCircle = 255;
+  Random random = new Random();
+  isCircle = random.nextBoolean();
+  isRed = random.nextBoolean();
+  xpos = random(100, displayWidth - 100);
+  ypos = random(100, displayHeight - 100);
+  size = random(100,300);
+  triangleLength = size;
+  triangleHeight = size;
+  print("Size: " + size + " Len: " + triangleLength + " Height: " + triangleHeight);
 }
 
 void showStimulus() {
@@ -155,33 +177,30 @@ void showStimulus() {
   stimulusTimestamp = System.currentTimeMillis();
 }
 
-double getCorrelation(ArrayList<Long> times, ArrayList<Long> distances){
-   double timesMean = getMean(times);
-   double distanceMean = getMean(distances);
-   double timesSTD = getStandardDeviation(times);
-   double distanceSTD = getStandardDeviation(distances);
-   Iterator<Long> timeIterator = times.iterator();
-   Iterator<Long> distanceIterator = distances.iterator();
-   double cov = 0;
-   while(distanceIterator.hasNext() && timeIterator.hasNext()){
-     cov = cov + (((double) distanceIterator.next() - distanceMean) * ((double) timeIterator.next() - timesMean));
-   }
-   cov = cov / times.size();
-   return cov / (timesSTD * distanceSTD);
-}
 
-void recordStimulusReactionTime() {
+void recordData() {
   long deltaTime = System.currentTimeMillis() - stimulusTimestamp;
   times.add(deltaTime);
-  addDistance();
+  if(isRed){
+    colors.add("Red");
+  } else{
+    colors.add("Yellow");
+  }
+  if(isCircle){
+    shapes.add("Circle");
+  } else {
+    shapes.add("Triangle");
+  }
 }
 
 void startExperiment() {
   times.clear();
-  distances.clear();
+  colors.clear();
+  shapes.clear();
   experimentActive = true;
   outputFile = createWriter("results.txt");
   errors = 0;
+  noAction = 0;
   lastUpdateTime = System.currentTimeMillis();
   startTestTrial();
 }
@@ -206,11 +225,11 @@ void stopExperiment() {
 void writeResultsToFile(){
   int counter = 1;
   Iterator<Long> timesIterator = times.iterator();
-  Iterator<Long> distancesIterator = distances.iterator();
-  outputFile.println("iteration  " + "time  " + "distance");
-  
-  while(timesIterator.hasNext() && distancesIterator.hasNext()){
-    outputFile.println(counter + "  " + timesIterator.next() + "  " + distancesIterator.next());
+  Iterator<String> colorsIterator = colors.iterator();
+  Iterator<String> shapesIterator = shapes.iterator();
+  outputFile.println("iteration  " + "time  " + "colors  " + "shapes");
+  while(timesIterator.hasNext()){
+    outputFile.println(counter + "  " + timesIterator.next() + "  " + colorsIterator.next() + "  " + shapesIterator.next());
     counter++;
   }
   outputFile.flush();
