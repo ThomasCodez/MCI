@@ -4,9 +4,9 @@ import java.util.Random;
 
 
 int errors;
-int errorsRed;
-int errorsYellow;
-int noAction;
+int errorsChina;
+int errorsMexico;
+int errorsItaly;
 PrintWriter outputFile;
 
 // if true, the experiment is currently active
@@ -24,22 +24,21 @@ long testStimulusTimeout = -1;
 
 // recorded reaction times in milliseconds
 ArrayList<Long> times = new ArrayList();
-ArrayList<Long> timesRed = new ArrayList();
-ArrayList<Long> timesYellow = new ArrayList();
-ArrayList<String> colors = new ArrayList();
-ArrayList<String> shapes = new ArrayList();
+ArrayList<Long> timesItaly = new ArrayList();
+ArrayList<Long> timesMexico = new ArrayList();
+ArrayList<Long> timesChina= new ArrayList();
+ArrayList<String> nations = new ArrayList();
+HashMap<PImage, String> imageMap = new HashMap<>();
+Iterator<PImage> imageIterator;
+PImage currentImage;
 
 // last time the experiment was updated.
 // used to calculate elapsed time
 long lastUpdateTime;
 
-boolean isCircle;
-boolean isRed;
-float xpos;
-float ypos;
-float size;
-float triangleHeight;
-float triangleLength;
+boolean isChina;
+boolean isItaly;
+boolean isMexico;
 
 void setup() {
   fullScreen();
@@ -59,43 +58,16 @@ void draw() {
   textSize(16);
 
   if (experimentActive) {
-    text("only Press Space when a Triangle appears!", 10, 40);
+    text("Press 1 if the food is from Italy, 2 if from China, 3 if from Mexico", 10, 40);
     updateExperiment();
     if (stimulusIsVisible) {
-      if (isRed) {
-        fill(255, 0, 0);
-      } else {
-        fill(255, 255, 0);
-      }
-      if (isCircle) {
-        circle(xpos, ypos, size); // size = 2*pi*radius
-      } else {
-        triangle(xpos, ypos, xpos + triangleLength, ypos, xpos + (0.5 * triangleLength), ypos - triangleHeight);
-      }
-
-      if (System.currentTimeMillis() - stimulusTimestamp > 3000) {
-        if (!isCircle) {
-          errors++;
-          if (isRed){
-            errorsRed++;
-          }else{
-            errorsYellow++;
-          }
-        } else {
-          noAction++;
-        }
-        print(noAction);
-        if (times.size() + errors + noAction == 30) {
-          stopExperiment();
-        }
-        startTestTrial(); //Start next iteration if more than 3 sec passed without user input
-      }
+      image(currentImage, 150, 300);
     }
     // show previous time if available
     if (!times.isEmpty()) {
       long lastTime = times.get(times.size() - 1);
       fill(0);
-      text(("Trial:" + (times.size() + errors + noAction) + "/30"), 10, 90);
+      text(("Trial:" + (times.size() + errors) + "/30"), 10, 90);
       text(lastTime + " ms", 10, 110);
     }
   } else {
@@ -104,17 +76,20 @@ void draw() {
     if (!times.isEmpty()) {
       writeResultsToFile();
 
-      text("Count: " + (times.size() + errors + noAction), 10, 60);
+      text("Count: " + (times.size() + errors), 10, 60);
       text("Mean: " + Math.round(getMean(times)) + " ms", 10, 80);
-      text("Mean red: " + Math.round(getMean(timesRed)) + " ms", 10, 100);
-      text("Mean yellow: " + Math.round(getMean(timesYellow)) + " ms", 10, 120);
-      text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 140);
-      text("SD red: " + Math.round(getStandardDeviation(timesRed)) + " ms", 10, 160);
-      text("SD yellow: " + Math.round(getStandardDeviation(timesYellow)) + " ms", 10, 180);
-      text("Error-Rate: " + errors + "/30", 10, 200);
-      text("Error-Rate red: " + errorsRed + "/30", 10, 220);
-      text("Error-Rate yellow: " + errorsYellow + "/30", 10, 240);
-      text("Median: " + getMedian(times) + "ms", 10, 260);
+      text("Mean China: " + Math.round(getMean(timesChina)) + " ms", 10, 100);
+      text("Mean Mexico: " + Math.round(getMean(timesMexico)) + " ms", 10, 120);
+      text("Mean Italy: " + Math.round(getMean(timesItaly)) + " ms", 10, 140);
+      text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 160);
+      text("SD China: " + Math.round(getStandardDeviation(timesChina)) + " ms", 10, 180);
+      text("SD Mexico: " + Math.round(getStandardDeviation(timesMexico)) + " ms", 10, 200);
+      text("SD Italy: " + Math.round(getStandardDeviation(timesItaly)) + " ms", 10, 220);
+      text("Error-Rate: " + errors + "/30", 10, 240);
+      text("Error-Rate China: " + errorsChina + "/30", 10, 260);
+      text("Error-Rate Mexico: " + errorsMexico + "/30", 10, 280);
+      text("Error-Rate Italy: " + errorsItaly + "/30", 10, 300);
+      text("Median: " + getMedian(times) + "ms", 10, 320);
       noLoop();
     }
   }
@@ -128,35 +103,94 @@ void keyPressed() {
       startExperiment();
       return;
     }
-
-    if (stimulusIsVisible && !isCircle) {
-      // record reaction time
-      recordData();
-
-      if (times.size() + errors + noAction == 30) {
-        stopExperiment();
-      }
-      // start next trial
-      startTestTrial();
-    } else {
-      errors++;
-      if (isRed){
-            errorsRed++;
-          }else{
-            errorsYellow++;
-          }
-      if (times.size() + errors + noAction == 30) {
-        stopExperiment();
-      }
-      startTestTrial();
-    }
   } else if (key == 'a') {
     if (experimentActive) {
       // stop the experiment and show results
       stopExperiment();
     }
-  } else if (key == 'b') {
-    // ...
+  } else if (key == '1') {
+    if (stimulusIsVisible && isItaly) {
+      // record reaction time
+      recordData();
+
+      if (times.size() + errors >= 30) {
+        stopExperiment();
+      } else{
+      startTestTrial();  
+      }
+      // start next trial
+      
+    } else {
+      errors++;
+      if(isItaly){
+       errorsItaly++; 
+      }else if(isChina){
+       errorsChina++;
+      } else {
+       errorsMexico++; 
+      }
+      if (times.size() + errors >= 30) {
+        stopExperiment();
+      } else{
+      startTestTrial();
+      }
+    }
+  } else if (key == '2') {
+    if (stimulusIsVisible && isChina) {
+      // record reaction time
+      recordData();
+
+      if (times.size() + errors >= 30) {
+        stopExperiment();
+      } else {
+         startTestTrial();
+      }
+      // start next trial
+     
+    } else {
+      errors++;
+      if(isItaly){
+       errorsItaly++; 
+      }else if(isChina){
+       errorsChina++;
+      } else {
+       errorsMexico++; 
+      }
+      if (times.size() + errors >= 30) {
+        stopExperiment();
+      } else{
+        startTestTrial();
+      }
+      
+    }
+  } else if (key == '3') {
+    if (stimulusIsVisible && isMexico) {
+      // record reaction time
+      recordData();
+      print(times.size() + errors);
+      if (times.size() + errors >= 30) {
+        stopExperiment();
+      } else{
+       startTestTrial();
+      }
+      // start next trial
+      
+    } else {
+      errors++;
+      print(times.size() + errors);
+      if(isItaly){
+       errorsItaly++; 
+      }else if(isChina){
+       errorsChina++;
+      } else {
+       errorsMexico++; 
+      }
+      if (times.size() + errors >= 30) {
+        stopExperiment();
+      } else {
+      startTestTrial();
+      }
+    }
   }
 }
 
@@ -181,16 +215,21 @@ long getMedian(ArrayList<Long> times) {
 
 void startTestTrial() {
   stimulusIsVisible = false;
+  isChina = false;
+  isItaly = false;
+  isMexico = false;
   float timeToWaitInSeconds = random(2, 6);
   testStimulusTimeout = (long) (timeToWaitInSeconds * 1000);
-  Random random = new Random();
-  isCircle = random.nextBoolean();
-  isRed = random.nextBoolean();
-  xpos = random(150, displayWidth - 150);
-  ypos = random(150, displayHeight - 150);
-  size = random(100, 300);
-  triangleLength = size;
-  triangleHeight = size;
+  currentImage = imageIterator.next();
+  if(imageMap.get(currentImage) == "China"){
+    isChina = true;
+  }
+  if(imageMap.get(currentImage) == "Mexico"){
+    isMexico = true;
+  }
+  if(imageMap.get(currentImage) == "Italy"){
+    isItaly = true;
+  }
 }
 
 void showStimulus() {
@@ -202,32 +241,31 @@ void showStimulus() {
 void recordData() {
   long deltaTime = System.currentTimeMillis() - stimulusTimestamp;
   times.add(deltaTime);
-  if (isRed) {
-    colors.add("Red");
-    timesRed.add(deltaTime);
+  if (isChina) {
+    timesChina.add(deltaTime);
+    nations.add(imageMap.get(currentImage));
+  } else if (isMexico) {
+    timesMexico.add(deltaTime);
+    nations.add(imageMap.get(currentImage));
   } else {
-    colors.add("Yellow");
-    timesYellow.add(deltaTime);
-  }
-  if (isCircle) {
-    shapes.add("Circle");
-  } else {
-    shapes.add("Triangle");
+    timesItaly.add(deltaTime); 
+    nations.add(imageMap.get(currentImage));
   }
 }
 
 void startExperiment() {
   times.clear();
-  timesRed.clear();
-  timesYellow.clear();
-  colors.clear();
-  shapes.clear();
+  timesChina.clear();
+  timesMexico.clear();
+  timesItaly.clear();
   experimentActive = true;
   outputFile = createWriter("results.txt");
   errors = 0;
-  errorsRed = 0;
-  errorsYellow = 0;
-  noAction = 0;
+  errorsChina = 0;
+  errorsMexico = 0;
+  errorsItaly = 0;
+  readInImages();
+  imageIterator = imageMap.keySet().iterator();
   lastUpdateTime = System.currentTimeMillis();
   startTestTrial();
 }
@@ -235,7 +273,7 @@ void startExperiment() {
 void updateExperiment() {
   long deltaTime = System.currentTimeMillis() - lastUpdateTime;
   lastUpdateTime = System.currentTimeMillis();
-
+  
   if (testStimulusTimeout > 0) {
     testStimulusTimeout -= deltaTime;
     if (testStimulusTimeout <= 0) showStimulus();
@@ -252,24 +290,34 @@ void stopExperiment() {
 void writeResultsToFile() {
   int counter = 1;
   Iterator<Long> timesIterator = times.iterator();
-  Iterator<String> colorsIterator = colors.iterator();
-  Iterator<String> shapesIterator = shapes.iterator();
-  outputFile.println("iteration  " + "time  " + "colors  " + "shapes");
+  Iterator<String> nationsIterator = nations.iterator();
+  outputFile.println("iteration  " + "time  " + "Nation  ");
   while (timesIterator.hasNext()) {
-    outputFile.println(counter + "  " + timesIterator.next() + "  " + colorsIterator.next() + "  " + shapesIterator.next());
+    outputFile.println(counter + "  " + timesIterator.next() + "  " + nationsIterator.next());
     counter++;
   }
-  outputFile.flush();
+  outputFile.println("Count: " + (times.size() + errors));
   outputFile.println("Errors:" + errors);
-  outputFile.println("ErrorsRed:" + errorsRed);
-  outputFile.println("ErrorsYellow:" + errorsYellow);
-  outputFile.println("Count: " + (times.size() + errors + noAction));
+  outputFile.println("ErrorsItaly:" + errorsItaly);
+  outputFile.println("ErrorsChina:" + errorsChina);
+  outputFile.println("ErrorsMexico:" + errorsMexico);
   outputFile.println("Mean: " + Math.round(getMean(times)));
-  outputFile.println("Mean red: " + Math.round(getMean(timesRed)));
-  outputFile.println("Mean yellow: " + Math.round(getMean(timesYellow)));
+  outputFile.println("Mean Italy: " + Math.round(getMean(timesItaly)));
+  outputFile.println("Mean China: " + Math.round(getMean(timesChina)));
+  outputFile.println("Mean Mexico: " + Math.round(getMean(timesMexico)));
   outputFile.println("SD: " + Math.round(getStandardDeviation(times)));
-  outputFile.println("SD red: " + Math.round(getStandardDeviation(timesRed)));
-  outputFile.println("SD yellow: " + Math.round(getStandardDeviation(timesYellow)));
+  outputFile.println("SD Italy: " + Math.round(getStandardDeviation(timesItaly)));
+  outputFile.println("SD China: " + Math.round(getStandardDeviation(timesChina)));
+  outputFile.println("SD China: " + Math.round(getStandardDeviation(timesMexico)));
   outputFile.println("Median: " + getMedian(times));
+  outputFile.flush();
   outputFile.close();
+}
+
+void readInImages(){
+  for(int i=1; i<11; i++){
+    imageMap.put(loadImage("China" + i + ".jpg"), "China");
+    imageMap.put(loadImage("Mexiko" + i + ".jpg"), "Mexico");
+    imageMap.put(loadImage("Italien" + i + ".jpg"), "Italy");
+  }
 }
