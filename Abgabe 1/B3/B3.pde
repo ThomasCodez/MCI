@@ -214,15 +214,18 @@ void writeResultsToFile() {
   }
   outputFile.flush();
   outputFile.println("Errors:" + errors);
-  outputFile.println("ErrorsRed:" + errorsRed);
-  outputFile.println("ErrorsYellow:" + errorsYellow);
-  outputFile.println("Count: " + (times.size() + errors + noAction));
+  outputFile.println("ErrorsItaly:" + errorsItaly);
+  outputFile.println("ErrorsChina:" + errorsChina);
+   outputFile.println("ErrorsMexico:" + errorsMexico);
+  outputFile.println("Count: " + (times.size() + errors));
   outputFile.println("Mean: " + Math.round(getMean(times)));
-  outputFile.println("Mean red: " + Math.round(getMean(timesRed)));
-  outputFile.println("Mean yellow: " + Math.round(getMean(timesYellow)));
+  outputFile.println("Mean Italy: " + Math.round(getMean(timesItaly)));
+  outputFile.println("Mean China: " + Math.round(getMean(timesChina)));
+  outputFile.println("Mean Mexico: " + Math.round(getMean(timesMexico)));
   outputFile.println("SD: " + Math.round(getStandardDeviation(times)));
-  outputFile.println("SD red: " + Math.round(getStandardDeviation(timesRed)));
-  outputFile.println("SD yellow: " + Math.round(getStandardDeviation(timesYellow)));
+  outputFile.println("SD Italy: " + Math.round(getStandardDeviation(timesItaly)));
+  outputFile.println("SD China: " + Math.round(getStandardDeviation(timesChina)));
+  outputFile.println("SD China: " + Math.round(getStandardDeviation(timesMexico)));
   outputFile.println("Median: " + getMedian(times));
   outputFile.close();
 }
