@@ -120,8 +120,10 @@ void keyPressed() {
       startTestTrial();
     } else {
       errors++;
-      if(!isItaly){
-       errorsItaly++; 
+      if(isMexico){
+       errorsMexico++; 
+      }else{
+        errorsChina++;
       }
       if (times.size() + errors >= 29) {
         stopExperiment();
@@ -140,8 +142,10 @@ void keyPressed() {
       startTestTrial();
     } else {
       errors++;
-      if(!isChina){
-       errorsChina++; 
+      if(isMexico){
+       errorsMexico++; 
+      }else{
+        errorsItaly++;
       }
       if (times.size() + errors >= 29) {
         stopExperiment();
@@ -160,8 +164,10 @@ void keyPressed() {
       startTestTrial();
     } else {
       errors++;
-      if(!isMexico){
-       errorsMexico++; 
+      if(isItaly){
+       errorsItaly++; 
+      }else{
+        errorsChina++;
       }
       if (times.size() + errors >= 29) {
         stopExperiment();
