@@ -113,66 +113,83 @@ void keyPressed() {
       // record reaction time
       recordData();
 
-      if (times.size() + errors >= 29) {
+      if (times.size() + errors >= 30) {
         stopExperiment();
+      } else{
+      startTestTrial();  
       }
       // start next trial
-      startTestTrial();
+      
     } else {
       errors++;
-      if(isMexico){
+      if(isItaly){
+       errorsItaly++; 
+      }else if(isChina){
+       errorsChina++;
+      } else {
        errorsMexico++; 
-      }else{
-        errorsChina++;
       }
-      if (times.size() + errors >= 29) {
+      if (times.size() + errors >= 30) {
         stopExperiment();
-      }
+      } else{
       startTestTrial();
+      }
     }
   } else if (key == '2') {
     if (stimulusIsVisible && isChina) {
       // record reaction time
       recordData();
 
-      if (times.size() + errors >= 29) {
+      if (times.size() + errors >= 30) {
         stopExperiment();
+      } else {
+         startTestTrial();
       }
       // start next trial
-      startTestTrial();
+     
     } else {
       errors++;
-      if(isMexico){
+      if(isItaly){
+       errorsItaly++; 
+      }else if(isChina){
+       errorsChina++;
+      } else {
        errorsMexico++; 
-      }else{
-        errorsItaly++;
       }
-      if (times.size() + errors >= 29) {
+      if (times.size() + errors >= 30) {
         stopExperiment();
+      } else{
+        startTestTrial();
       }
-      startTestTrial();
+      
     }
   } else if (key == '3') {
     if (stimulusIsVisible && isMexico) {
       // record reaction time
       recordData();
-
-      if (times.size() + errors >= 29) {
+      print(times.size() + errors);
+      if (times.size() + errors >= 30) {
         stopExperiment();
+      } else{
+       startTestTrial();
       }
       // start next trial
-      startTestTrial();
+      
     } else {
       errors++;
+      print(times.size() + errors);
       if(isItaly){
        errorsItaly++; 
-      }else{
-        errorsChina++;
+      }else if(isChina){
+       errorsChina++;
+      } else {
+       errorsMexico++; 
       }
-      if (times.size() + errors >= 29) {
+      if (times.size() + errors >= 30) {
         stopExperiment();
-      }
+      } else {
       startTestTrial();
+      }
     }
   }
 }
@@ -279,12 +296,11 @@ void writeResultsToFile() {
     outputFile.println(counter + "  " + timesIterator.next() + "  " + nationsIterator.next());
     counter++;
   }
-  outputFile.flush();
+  outputFile.println("Count: " + (times.size() + errors));
   outputFile.println("Errors:" + errors);
   outputFile.println("ErrorsItaly:" + errorsItaly);
   outputFile.println("ErrorsChina:" + errorsChina);
-   outputFile.println("ErrorsMexico:" + errorsMexico);
-  outputFile.println("Count: " + (times.size() + errors));
+  outputFile.println("ErrorsMexico:" + errorsMexico);
   outputFile.println("Mean: " + Math.round(getMean(times)));
   outputFile.println("Mean Italy: " + Math.round(getMean(timesItaly)));
   outputFile.println("Mean China: " + Math.round(getMean(timesChina)));
@@ -294,6 +310,7 @@ void writeResultsToFile() {
   outputFile.println("SD China: " + Math.round(getStandardDeviation(timesChina)));
   outputFile.println("SD China: " + Math.round(getStandardDeviation(timesMexico)));
   outputFile.println("Median: " + getMedian(times));
+  outputFile.flush();
   outputFile.close();
 }
 
