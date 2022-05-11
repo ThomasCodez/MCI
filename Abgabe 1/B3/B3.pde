@@ -4,9 +4,9 @@ import java.util.Random;
 
 
 int errors;
-int errorsRed;
-int errorsYellow;
-int noAction;
+int errorsChina;
+int errorsMexico;
+int errorsItaly;
 PrintWriter outputFile;
 
 // if true, the experiment is currently active
@@ -24,22 +24,19 @@ long testStimulusTimeout = -1;
 
 // recorded reaction times in milliseconds
 ArrayList<Long> times = new ArrayList();
-ArrayList<Long> timesRed = new ArrayList();
-ArrayList<Long> timesYellow = new ArrayList();
-ArrayList<String> colors = new ArrayList();
-ArrayList<String> shapes = new ArrayList();
+ArrayList<Long> timesItaly = new ArrayList();
+ArrayList<Long> timesMexico = new ArrayList();
+ArrayList<Long> timesChina= new ArrayList();
+
+ArrayList<String> nations = new ArrayList();
 
 // last time the experiment was updated.
 // used to calculate elapsed time
 long lastUpdateTime;
 
-boolean isCircle;
-boolean isRed;
-float xpos;
-float ypos;
-float size;
-float triangleHeight;
-float triangleLength;
+boolean isChina;
+boolean isItaly;
+boolean isMexico;
 
 void setup() {
   fullScreen();
@@ -59,43 +56,15 @@ void draw() {
   textSize(16);
 
   if (experimentActive) {
-    text("only Press Space when a Triangle appears!", 10, 40);
+    text("Press 1 if the food is from China, 2 if from Mexico, 3 if from Italy", 10, 40);
     updateExperiment();
     if (stimulusIsVisible) {
-      if (isRed) {
-        fill(255, 0, 0);
-      } else {
-        fill(255, 255, 0);
-      }
-      if (isCircle) {
-        circle(xpos, ypos, size); // size = 2*pi*radius
-      } else {
-        triangle(xpos, ypos, xpos + triangleLength, ypos, xpos + (0.5 * triangleLength), ypos - triangleHeight);
-      }
-
-      if (System.currentTimeMillis() - stimulusTimestamp > 3000) {
-        if (!isCircle) {
-          errors++;
-          if (isRed){
-            errorsRed++;
-          }else{
-            errorsYellow++;
-          }
-        } else {
-          noAction++;
-        }
-        print(noAction);
-        if (times.size() + errors + noAction == 30) {
-          stopExperiment();
-        }
-        startTestTrial(); //Start next iteration if more than 3 sec passed without user input
-      }
     }
     // show previous time if available
     if (!times.isEmpty()) {
       long lastTime = times.get(times.size() - 1);
       fill(0);
-      text(("Trial:" + (times.size() + errors + noAction) + "/30"), 10, 90);
+      text(("Trial:" + (times.size() + errors) + "/30"), 10, 90);
       text(lastTime + " ms", 10, 110);
     }
   } else {
@@ -104,16 +73,19 @@ void draw() {
     if (!times.isEmpty()) {
       writeResultsToFile();
 
-      text("Count: " + (times.size() + errors + noAction), 10, 60);
+      text("Count: " + (times.size() + errors), 10, 60);
       text("Mean: " + Math.round(getMean(times)) + " ms", 10, 80);
-      text("Mean red: " + Math.round(getMean(timesRed)) + " ms", 10, 100);
-      text("Mean yellow: " + Math.round(getMean(timesYellow)) + " ms", 10, 120);
+      text("Mean China: " + Math.round(getMean(timesChina)) + " ms", 10, 100);
+      text("Mean Mexico: " + Math.round(getMean(timesMexico)) + " ms", 10, 120);
+      text("Mean Italy: " + Math.round(getMean(timesItaly)) + " ms", 10, 120);
       text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 140);
-      text("SD red: " + Math.round(getStandardDeviation(timesRed)) + " ms", 10, 160);
-      text("SD yellow: " + Math.round(getStandardDeviation(timesYellow)) + " ms", 10, 180);
+      text("SD China: " + Math.round(getStandardDeviation(timesChina)) + " ms", 10, 160);
+      text("SD Mexico: " + Math.round(getStandardDeviation(timesMexico)) + " ms", 10, 180);
+      text("SD Italy: " + Math.round(getStandardDeviation(timesItaly)) + " ms", 10, 180);
       text("Error-Rate: " + errors + "/30", 10, 200);
-      text("Error-Rate red: " + errorsRed + "/30", 10, 220);
-      text("Error-Rate yellow: " + errorsYellow + "/30", 10, 240);
+      text("Error-Rate China: " + errorsChina + "/30", 10, 220);
+      text("Error-Rate Mexico: " + errorsMexico + "/30", 10, 240);
+      text("Error-Rate Italy: " + errorsItaly + "/30", 10, 240);
       text("Median: " + getMedian(times) + "ms", 10, 260);
       noLoop();
     }
@@ -129,23 +101,18 @@ void keyPressed() {
       return;
     }
 
-    if (stimulusIsVisible && !isCircle) {
+    if (stimulusIsVisible) {
       // record reaction time
       recordData();
 
-      if (times.size() + errors + noAction == 30) {
+      if (times.size() + errors >= 30) {
         stopExperiment();
       }
       // start next trial
       startTestTrial();
     } else {
       errors++;
-      if (isRed){
-            errorsRed++;
-          }else{
-            errorsYellow++;
-          }
-      if (times.size() + errors + noAction == 30) {
+      if (times.size() + errors >= 30) {
         stopExperiment();
       }
       startTestTrial();
@@ -183,14 +150,6 @@ void startTestTrial() {
   stimulusIsVisible = false;
   float timeToWaitInSeconds = random(2, 6);
   testStimulusTimeout = (long) (timeToWaitInSeconds * 1000);
-  Random random = new Random();
-  isCircle = random.nextBoolean();
-  isRed = random.nextBoolean();
-  xpos = random(150, displayWidth - 150);
-  ypos = random(150, displayHeight - 150);
-  size = random(100, 300);
-  triangleLength = size;
-  triangleHeight = size;
 }
 
 void showStimulus() {
@@ -202,32 +161,26 @@ void showStimulus() {
 void recordData() {
   long deltaTime = System.currentTimeMillis() - stimulusTimestamp;
   times.add(deltaTime);
-  if (isRed) {
-    colors.add("Red");
-    timesRed.add(deltaTime);
+  if (isChina) {
+    timesChina.add(deltaTime);
+  } else if (isMexico) {
+    timesMexico.add(deltaTime);
   } else {
-    colors.add("Yellow");
-    timesYellow.add(deltaTime);
-  }
-  if (isCircle) {
-    shapes.add("Circle");
-  } else {
-    shapes.add("Triangle");
+    timesItaly.add(deltaTime); 
   }
 }
 
 void startExperiment() {
   times.clear();
-  timesRed.clear();
-  timesYellow.clear();
-  colors.clear();
-  shapes.clear();
+  timesChina.clear();
+  timesMexico.clear();
+  timesItaly.clear();
   experimentActive = true;
   outputFile = createWriter("results.txt");
   errors = 0;
-  errorsRed = 0;
-  errorsYellow = 0;
-  noAction = 0;
+  errorsChina = 0;
+  errorsMexico = 0;
+  errorsItaly = 0;
   lastUpdateTime = System.currentTimeMillis();
   startTestTrial();
 }
@@ -254,7 +207,7 @@ void writeResultsToFile() {
   Iterator<Long> timesIterator = times.iterator();
   Iterator<String> colorsIterator = colors.iterator();
   Iterator<String> shapesIterator = shapes.iterator();
-  outputFile.println("iteration  " + "time  " + "colors  " + "shapes");
+  outputFile.println("iteration  " + "time  " + "Nation  ");
   while (timesIterator.hasNext()) {
     outputFile.println(counter + "  " + timesIterator.next() + "  " + colorsIterator.next() + "  " + shapesIterator.next());
     counter++;
