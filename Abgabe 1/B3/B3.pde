@@ -27,8 +27,10 @@ ArrayList<Long> times = new ArrayList();
 ArrayList<Long> timesItaly = new ArrayList();
 ArrayList<Long> timesMexico = new ArrayList();
 ArrayList<Long> timesChina= new ArrayList();
-
 ArrayList<String> nations = new ArrayList();
+HashMap<PImage, String> imageMap = new HashMap<>();
+Iterator<PImage> imageIterator;
+PImage currentImage;
 
 // last time the experiment was updated.
 // used to calculate elapsed time
@@ -56,9 +58,10 @@ void draw() {
   textSize(16);
 
   if (experimentActive) {
-    text("Press 1 if the food is from China, 2 if from Mexico, 3 if from Italy", 10, 40);
+    text("Press 1 if the food is from Italy, 2 if from China, 3 if from Mexico", 10, 40);
     updateExperiment();
     if (stimulusIsVisible) {
+      image(currentImage, displayWidth / 2 - 500, 300);
     }
     // show previous time if available
     if (!times.isEmpty()) {
@@ -100,8 +103,13 @@ void keyPressed() {
       startExperiment();
       return;
     }
-
-    if (stimulusIsVisible) {
+  } else if (key == 'a') {
+    if (experimentActive) {
+      // stop the experiment and show results
+      stopExperiment();
+    }
+  } else if (key == '1') {
+    if (stimulusIsVisible && isItaly) {
       // record reaction time
       recordData();
 
@@ -112,18 +120,54 @@ void keyPressed() {
       startTestTrial();
     } else {
       errors++;
+      if(!isItaly){
+       errorsItaly++; 
+      }
       if (times.size() + errors >= 30) {
         stopExperiment();
       }
       startTestTrial();
     }
-  } else if (key == 'a') {
-    if (experimentActive) {
-      // stop the experiment and show results
-      stopExperiment();
+  } else if (key == '2') {
+    if (stimulusIsVisible && isChina) {
+      // record reaction time
+      recordData();
+
+      if (times.size() + errors >= 30) {
+        stopExperiment();
+      }
+      // start next trial
+      startTestTrial();
+    } else {
+      errors++;
+      if(!isChina){
+       errorsChina++; 
+      }
+      if (times.size() + errors >= 30) {
+        stopExperiment();
+      }
+      startTestTrial();
     }
-  } else if (key == 'b') {
-    // ...
+  } else if (key == '3') {
+    if (stimulusIsVisible && isMexico) {
+      // record reaction time
+      recordData();
+
+      if (times.size() + errors >= 30) {
+        stopExperiment();
+      }
+      // start next trial
+      startTestTrial();
+    } else {
+      errors++;
+      if(!isMexico){
+       errorsMexico++; 
+      }
+      if (times.size() + errors >= 30) {
+        stopExperiment();
+      }
+      startTestTrial();
+    }
   }
 }
 
@@ -148,8 +192,21 @@ long getMedian(ArrayList<Long> times) {
 
 void startTestTrial() {
   stimulusIsVisible = false;
+  isChina = false;
+  isItaly = false;
+  isMexico = false;
   float timeToWaitInSeconds = random(2, 6);
   testStimulusTimeout = (long) (timeToWaitInSeconds * 1000);
+  currentImage = imageIterator.next();
+  if(imageMap.get(currentImage) == "China"){
+    isChina = true;
+  }
+  if(imageMap.get(currentImage) == "Mexico"){
+    isMexico = true;
+  }
+  if(imageMap.get(currentImage) == "Italy"){
+    isItaly = true;
+  }
 }
 
 void showStimulus() {
@@ -181,6 +238,8 @@ void startExperiment() {
   errorsChina = 0;
   errorsMexico = 0;
   errorsItaly = 0;
+  readInImages();
+  imageIterator = imageMap.keySet().iterator();
   lastUpdateTime = System.currentTimeMillis();
   startTestTrial();
 }
@@ -205,11 +264,10 @@ void stopExperiment() {
 void writeResultsToFile() {
   int counter = 1;
   Iterator<Long> timesIterator = times.iterator();
-  Iterator<String> colorsIterator = colors.iterator();
-  Iterator<String> shapesIterator = shapes.iterator();
+  Iterator<String> nationsIterator = nations.iterator();
   outputFile.println("iteration  " + "time  " + "Nation  ");
   while (timesIterator.hasNext()) {
-    outputFile.println(counter + "  " + timesIterator.next() + "  " + colorsIterator.next() + "  " + shapesIterator.next());
+    outputFile.println(counter + "  " + timesIterator.next() + "  " + nationsIterator.next());
     counter++;
   }
   outputFile.flush();
@@ -228,4 +286,12 @@ void writeResultsToFile() {
   outputFile.println("SD China: " + Math.round(getStandardDeviation(timesMexico)));
   outputFile.println("Median: " + getMedian(times));
   outputFile.close();
+}
+
+void readInImages(){
+  for(int i=1; i<11; i++){
+    imageMap.put(loadImage("China" + i + ".jpg"), "China");
+    imageMap.put(loadImage("Mexiko" + i + ".jpg"), "Mexico");
+    imageMap.put(loadImage("Italien" + i + ".jpg"), "Italy");
+  }
 }
