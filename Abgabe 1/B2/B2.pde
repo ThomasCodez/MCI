@@ -4,6 +4,8 @@ import java.util.Random;
 
 
 int errors;
+int errorsRed;
+int errorsYellow;
 int noAction;
 PrintWriter outputFile;
 
@@ -22,6 +24,8 @@ long testStimulusTimeout = -1;
 
 // recorded reaction times in milliseconds
 ArrayList<Long> times = new ArrayList();
+ArrayList<Long> timesRed = new ArrayList();
+ArrayList<Long> timesYellow = new ArrayList();
 ArrayList<String> colors = new ArrayList();
 ArrayList<String> shapes = new ArrayList();
 
@@ -72,6 +76,11 @@ void draw() {
       if (System.currentTimeMillis() - stimulusTimestamp > 3000) {
         if (!isCircle) {
           errors++;
+          if (isRed){
+            errorsRed++;
+          }else{
+            errorsYellow++;
+          }
         } else {
           noAction++;
         }
@@ -97,9 +106,15 @@ void draw() {
 
       text("Count: " + (times.size() + errors + noAction), 10, 60);
       text("Mean: " + Math.round(getMean(times)) + " ms", 10, 80);
-      text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 100);
-      text("Error-Rate: " + errors + "/30", 10, 120);
-      text("Median: " + getMedian(times) + "ms", 10, 160);
+      text("Mean red: " + Math.round(getMean(timesRed)) + " ms", 10, 100);
+      text("Mean yellow: " + Math.round(getMean(timesYellow)) + " ms", 10, 120);
+      text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 140);
+      text("SD red: " + Math.round(getStandardDeviation(timesRed)) + " ms", 10, 160);
+      text("SD yellow: " + Math.round(getStandardDeviation(timesYellow)) + " ms", 10, 180);
+      text("Error-Rate: " + errors + "/30", 10, 200);
+      text("Error-Rate red: " + errorsRed + "/30", 10, 220);
+      text("Error-Rate yellow: " + errorsYellow + "/30", 10, 240);
+      text("Median: " + getMedian(times) + "ms", 10, 260);
       noLoop();
     }
   }
@@ -125,6 +140,11 @@ void keyPressed() {
       startTestTrial();
     } else {
       errors++;
+      if (isRed){
+            errorsRed++;
+          }else{
+            errorsYellow++;
+          }
       if (times.size() + errors + noAction == 30) {
         stopExperiment();
       }
@@ -184,8 +204,10 @@ void recordData() {
   times.add(deltaTime);
   if (isRed) {
     colors.add("Red");
+    timesRed.add(deltaTime);
   } else {
     colors.add("Yellow");
+    timesYellow.add(deltaTime);
   }
   if (isCircle) {
     shapes.add("Circle");
@@ -196,11 +218,15 @@ void recordData() {
 
 void startExperiment() {
   times.clear();
+  timesRed.clear();
+  timesYellow.clear();
   colors.clear();
   shapes.clear();
   experimentActive = true;
   outputFile = createWriter("results.txt");
   errors = 0;
+  errorsRed = 0;
+  errorsYellow = 0;
   noAction = 0;
   lastUpdateTime = System.currentTimeMillis();
   startTestTrial();
@@ -234,5 +260,16 @@ void writeResultsToFile() {
     counter++;
   }
   outputFile.flush();
+  outputFile.println("Errors:" + errors);
+  outputFile.println("ErrorsRed:" + errorsRed);
+  outputFile.println("ErrorsYellow:" + errorsYellow);
+  outputFile.println("Count: " + (times.size() + errors + noAction));
+  outputFile.println("Mean: " + Math.round(getMean(times)));
+  outputFile.println("Mean red: " + Math.round(getMean(timesRed)));
+  outputFile.println("Mean yellow: " + Math.round(getMean(timesYellow)));
+  outputFile.println("SD: " + Math.round(getStandardDeviation(times)));
+  outputFile.println("SD red: " + Math.round(getStandardDeviation(timesRed)));
+  outputFile.println("SD yellow: " + Math.round(getStandardDeviation(timesYellow)));
+  outputFile.println("Median: " + getMedian(times));
   outputFile.close();
 }
