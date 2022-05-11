@@ -48,46 +48,45 @@ void draw() {
   background(255); // clear to white
   fill(0); // fill with black
   noStroke();
-  
+
   textAlign(LEFT, TOP);
   textSize(24);
   text("User Study", 10, 10);
   textSize(16);
-  
+
   if (experimentActive) {
     text("only Press Space when a Triangle appears!", 10, 40);
     updateExperiment();
-    if(stimulusIsVisible){
-      if(isRed){
-      fill(255,0,0); 
-      } else{
-      fill(255,255,0);  
-      }
-      if(isCircle){
-      circle(xpos,ypos,size); // size = 2*pi*radius
+    if (stimulusIsVisible) {
+      if (isRed) {
+        fill(255, 0, 0);
       } else {
-      triangle(xpos,ypos,xpos + triangleLength, ypos, xpos + (0.5 * triangleLength), ypos - triangleHeight);
+        fill(255, 255, 0);
       }
-      
-      if(System.currentTimeMillis() - stimulusTimestamp > 3000){
-        if(!isCircle){
+      if (isCircle) {
+        circle(xpos, ypos, size); // size = 2*pi*radius
+      } else {
+        triangle(xpos, ypos, xpos + triangleLength, ypos, xpos + (0.5 * triangleLength), ypos - triangleHeight);
+      }
+
+      if (System.currentTimeMillis() - stimulusTimestamp > 3000) {
+        if (!isCircle) {
           errors++;
         } else {
           noAction++;
         }
         print(noAction);
-        if(times.size() + errors + noAction == 30){
-        stopExperiment();
+        if (times.size() + errors + noAction == 30) {
+          stopExperiment();
         }
-         startTestTrial(); //Start next iteration if more than 3 sec passed without user input
+        startTestTrial(); //Start next iteration if more than 3 sec passed without user input
       }
-      
     }
     // show previous time if available
     if (!times.isEmpty()) {
       long lastTime = times.get(times.size() - 1);
       fill(0);
-      text(("Trial:" + (times.size() + errors + noAction) + "/30"), 10,90);
+      text(("Trial:" + (times.size() + errors + noAction) + "/30"), 10, 90);
       text(lastTime + " ms", 10, 110);
     }
   } else {
@@ -95,13 +94,13 @@ void draw() {
     // we have some experiment results#
     if (!times.isEmpty()) {
       writeResultsToFile();
-      
-      text("Count: " + times.size(), 10, 60);
+
+      text("Count: " + (times.size() + errors + noAction), 10, 60);
       text("Mean: " + Math.round(getMean(times)) + " ms", 10, 80);
       text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 100);
-      text("Error-Rate: " + (errors/ (times.size() + noAction)) * 100 + "%", 10, 120);
+      text("Error-Rate: " + errors + "/30", 10, 120);
       text("Median: " + getMedian(times) + "ms", 10, 160);
-     
+      noLoop();
     }
   }
 }
@@ -114,20 +113,20 @@ void keyPressed() {
       startExperiment();
       return;
     }
-    
+
     if (stimulusIsVisible && !isCircle) {
       // record reaction time
       recordData();
-      
-      if(times.size() + errors + noAction == 30){
-      stopExperiment();
+
+      if (times.size() + errors + noAction == 30) {
+        stopExperiment();
       }
       // start next trial
       startTestTrial();
-    } else { 
+    } else {
       errors++;
-      if(times.size() + errors == 30){
-      stopExperiment();
+      if (times.size() + errors + noAction == 30) {
+        stopExperiment();
       }
       startTestTrial();
     }
@@ -139,7 +138,6 @@ void keyPressed() {
   } else if (key == 'b') {
     // ...
   }
-
 }
 
 double getMean(ArrayList<Long> data) {
@@ -156,7 +154,7 @@ double getStandardDeviation(ArrayList<Long> data) {
 
 
 
-long getMedian(ArrayList<Long> times){
+long getMedian(ArrayList<Long> times) {
   Collections.sort(times);
   return times.get((int) Math.floor(times.size() / 2));
 }
@@ -170,7 +168,7 @@ void startTestTrial() {
   isRed = random.nextBoolean();
   xpos = random(150, displayWidth - 150);
   ypos = random(150, displayHeight - 150);
-  size = random(100,300);
+  size = random(100, 300);
   triangleLength = size;
   triangleHeight = size;
 }
@@ -184,12 +182,12 @@ void showStimulus() {
 void recordData() {
   long deltaTime = System.currentTimeMillis() - stimulusTimestamp;
   times.add(deltaTime);
-  if(isRed){
+  if (isRed) {
     colors.add("Red");
-  } else{
+  } else {
     colors.add("Yellow");
   }
-  if(isCircle){
+  if (isCircle) {
     shapes.add("Circle");
   } else {
     shapes.add("Triangle");
@@ -211,7 +209,7 @@ void startExperiment() {
 void updateExperiment() {
   long deltaTime = System.currentTimeMillis() - lastUpdateTime;
   lastUpdateTime = System.currentTimeMillis();
-  
+
   if (testStimulusTimeout > 0) {
     testStimulusTimeout -= deltaTime;
     if (testStimulusTimeout <= 0) showStimulus();
@@ -225,13 +223,13 @@ void stopExperiment() {
   experimentActive = false;
 }
 
-void writeResultsToFile(){
+void writeResultsToFile() {
   int counter = 1;
   Iterator<Long> timesIterator = times.iterator();
   Iterator<String> colorsIterator = colors.iterator();
   Iterator<String> shapesIterator = shapes.iterator();
   outputFile.println("iteration  " + "time  " + "colors  " + "shapes");
-  while(timesIterator.hasNext()){
+  while (timesIterator.hasNext()) {
     outputFile.println(counter + "  " + timesIterator.next() + "  " + colorsIterator.next() + "  " + shapesIterator.next());
     counter++;
   }
