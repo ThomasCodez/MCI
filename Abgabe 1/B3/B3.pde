@@ -61,7 +61,7 @@ void draw() {
     text("Press 1 if the food is from Italy, 2 if from China, 3 if from Mexico", 10, 40);
     updateExperiment();
     if (stimulusIsVisible) {
-      image(currentImage, displayWidth / 2 - 500, 300);
+      image(currentImage, 150, 300);
     }
     // show previous time if available
     if (!times.isEmpty()) {
@@ -80,16 +80,16 @@ void draw() {
       text("Mean: " + Math.round(getMean(times)) + " ms", 10, 80);
       text("Mean China: " + Math.round(getMean(timesChina)) + " ms", 10, 100);
       text("Mean Mexico: " + Math.round(getMean(timesMexico)) + " ms", 10, 120);
-      text("Mean Italy: " + Math.round(getMean(timesItaly)) + " ms", 10, 120);
-      text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 140);
-      text("SD China: " + Math.round(getStandardDeviation(timesChina)) + " ms", 10, 160);
-      text("SD Mexico: " + Math.round(getStandardDeviation(timesMexico)) + " ms", 10, 180);
-      text("SD Italy: " + Math.round(getStandardDeviation(timesItaly)) + " ms", 10, 180);
-      text("Error-Rate: " + errors + "/30", 10, 200);
-      text("Error-Rate China: " + errorsChina + "/30", 10, 220);
-      text("Error-Rate Mexico: " + errorsMexico + "/30", 10, 240);
-      text("Error-Rate Italy: " + errorsItaly + "/30", 10, 240);
-      text("Median: " + getMedian(times) + "ms", 10, 260);
+      text("Mean Italy: " + Math.round(getMean(timesItaly)) + " ms", 10, 140);
+      text("SD: " + Math.round(getStandardDeviation(times)) + " ms", 10, 160);
+      text("SD China: " + Math.round(getStandardDeviation(timesChina)) + " ms", 10, 180);
+      text("SD Mexico: " + Math.round(getStandardDeviation(timesMexico)) + " ms", 10, 200);
+      text("SD Italy: " + Math.round(getStandardDeviation(timesItaly)) + " ms", 10, 220);
+      text("Error-Rate: " + errors + "/30", 10, 240);
+      text("Error-Rate China: " + errorsChina + "/30", 10, 260);
+      text("Error-Rate Mexico: " + errorsMexico + "/30", 10, 280);
+      text("Error-Rate Italy: " + errorsItaly + "/30", 10, 300);
+      text("Median: " + getMedian(times) + "ms", 10, 320);
       noLoop();
     }
   }
@@ -113,7 +113,7 @@ void keyPressed() {
       // record reaction time
       recordData();
 
-      if (times.size() + errors >= 30) {
+      if (times.size() + errors >= 29) {
         stopExperiment();
       }
       // start next trial
@@ -123,7 +123,7 @@ void keyPressed() {
       if(!isItaly){
        errorsItaly++; 
       }
-      if (times.size() + errors >= 30) {
+      if (times.size() + errors >= 29) {
         stopExperiment();
       }
       startTestTrial();
@@ -133,7 +133,7 @@ void keyPressed() {
       // record reaction time
       recordData();
 
-      if (times.size() + errors >= 30) {
+      if (times.size() + errors >= 29) {
         stopExperiment();
       }
       // start next trial
@@ -143,7 +143,7 @@ void keyPressed() {
       if(!isChina){
        errorsChina++; 
       }
-      if (times.size() + errors >= 30) {
+      if (times.size() + errors >= 29) {
         stopExperiment();
       }
       startTestTrial();
@@ -153,7 +153,7 @@ void keyPressed() {
       // record reaction time
       recordData();
 
-      if (times.size() + errors >= 30) {
+      if (times.size() + errors >= 29) {
         stopExperiment();
       }
       // start next trial
@@ -163,7 +163,7 @@ void keyPressed() {
       if(!isMexico){
        errorsMexico++; 
       }
-      if (times.size() + errors >= 30) {
+      if (times.size() + errors >= 29) {
         stopExperiment();
       }
       startTestTrial();
@@ -220,10 +220,13 @@ void recordData() {
   times.add(deltaTime);
   if (isChina) {
     timesChina.add(deltaTime);
+    nations.add(imageMap.get(currentImage));
   } else if (isMexico) {
     timesMexico.add(deltaTime);
+    nations.add(imageMap.get(currentImage));
   } else {
     timesItaly.add(deltaTime); 
+    nations.add(imageMap.get(currentImage));
   }
 }
 
@@ -247,7 +250,7 @@ void startExperiment() {
 void updateExperiment() {
   long deltaTime = System.currentTimeMillis() - lastUpdateTime;
   lastUpdateTime = System.currentTimeMillis();
-
+  
   if (testStimulusTimeout > 0) {
     testStimulusTimeout -= deltaTime;
     if (testStimulusTimeout <= 0) showStimulus();
