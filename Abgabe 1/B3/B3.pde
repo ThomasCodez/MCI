@@ -28,7 +28,7 @@ ArrayList<Long> timesItaly = new ArrayList();
 ArrayList<Long> timesMexico = new ArrayList();
 ArrayList<Long> timesChina= new ArrayList();
 ArrayList<String> nations = new ArrayList();
-HashMap<PImage, String> imageMap = new HashMap<>();
+HashMap<PImage, String> imageMap = new HashMap();
 Iterator<PImage> imageIterator;
 PImage currentImage;
 
