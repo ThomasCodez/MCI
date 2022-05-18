@@ -9,6 +9,7 @@ void setup(){
 }
 
 void draw(){
+  println(getSequence());
   background(255); // clear to white
   fill(0); // fill with black
   noStroke();
