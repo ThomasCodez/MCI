@@ -1,4 +1,4 @@
-Class Point{
+public class Point{
   int posX;
   int posY;
   public Point(int posX, int posY){
@@ -6,11 +6,11 @@ Class Point{
     this.posY = posY;
   }
   
-  public getPosX(){
+  public int getPosX(){
    return this.posX; 
   }
   
-  public getPosY(){
+  public int getPosY(){
    return this.posY; 
   }
 }
