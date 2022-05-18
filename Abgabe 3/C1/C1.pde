@@ -44,4 +44,20 @@ char getPressedChar(){
       }
     }
   }
+  String generateSequence(){
+  String sequence;
+  for(int i=0; i<15; i++){
+    Random r = new Random();
+    char c = (char)(r.nextInt(29) + 'a');
+    if(c==123){
+      c='.';
+    }else if(c==124){
+      c=',';
+    }else if(c==125){
+      c=' ';
+    sequence = sequence + c;
+    }
+  }
+  println(sequence);
+  return sequence;
 }
