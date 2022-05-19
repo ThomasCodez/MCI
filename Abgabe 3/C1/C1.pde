@@ -74,8 +74,10 @@ void mousePressed(){
     pressedString = pressedString + lastPressedChar.toString();
   }
   
-  if(pressedString.equals(new String(sequence))){
+  if(pressedString.equals(new String(sequence)) && (trials<30)){
     startExperiment();
+  }else{
+    //TODO
   }
 }
 
@@ -114,7 +116,7 @@ void startExperiment(){
   sequence = generateSequence();
   sequencePosition = 0;
   experimentActive = true;
-  timestamp=System.currentTimeMillis();
+  timestamp = System.currentTimeMillis();
   pressedString = "";
   trials++;
 }
