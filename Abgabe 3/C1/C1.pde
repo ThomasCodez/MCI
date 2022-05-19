@@ -5,12 +5,14 @@ int sequencePosition;
 boolean experimentActive;
 char[] sequence;
 String pressedString;
+int trials;
 void setup(){
   fullScreen();
   pixelDensity(displayDensity());
   frameRate(60);
   keyPositions = new HashMap();
   experimentActive = false;
+  trials = 0;
 }
 
 void draw(){
@@ -25,8 +27,9 @@ void draw(){
   if(!experimentActive){
   startExperiment();
   }
-  text("Type: " + new String(sequence), 50, 200);
-  text("Already typed: " + pressedString, 50, 220);
+  text("Trials: " + trials + "/30", 50,200);
+  text("Type: " + new String(sequence), 50, 220);
+  text("Already typed: " + pressedString, 50, 240);
 }
 
 void initKeyboard(){
@@ -63,6 +66,10 @@ void mousePressed(){
   if(lastPressedChar == sequence[sequencePosition]){
     sequencePosition++;
     pressedString = pressedString + lastPressedChar.toString();
+  }
+  
+  if(pressedString.equals(new String(sequence))){
+    startExperiment();
   }
 }
 
@@ -102,4 +109,5 @@ void startExperiment(){
   sequencePosition = 0;
   experimentActive = true;
   pressedString = "";
+  trials++;
 }
