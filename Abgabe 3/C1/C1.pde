@@ -6,6 +6,9 @@ boolean experimentActive;
 char[] sequence;
 String pressedString;
 int trials;
+ArrayList<Long> IDlist = new ArrayList();
+ArrayList<Long> MTlist = new ArrayList();
+long timestamp;
 void setup(){
   fullScreen();
   pixelDensity(displayDensity());
@@ -64,6 +67,9 @@ void initKeyboard(){
 void mousePressed(){
   lastPressedChar = getPressedCharacter();
   if(lastPressedChar == sequence[sequencePosition]){
+    IDlist.add(getID());
+    MTlist.add(getMT());
+    timestamp=System.currentTimeMillis();
     sequencePosition++;
     pressedString = pressedString + lastPressedChar.toString();
   }
@@ -108,6 +114,15 @@ void startExperiment(){
   sequence = generateSequence();
   sequencePosition = 0;
   experimentActive = true;
+  timestamp=System.currentTimeMillis();
   pressedString = "";
   trials++;
+}
+Long getID(){
+  Long ID = null;  //TODO
+  return ID;
+}
+Long getMT(){
+  Long MT = null;  //TODO
+  return MT;
 }
