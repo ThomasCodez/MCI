@@ -9,6 +9,8 @@ int trials;
 ArrayList<Long> IDlist = new ArrayList();
 ArrayList<Long> MTlist = new ArrayList();
 long timestamp;
+PrintWriter outputFile;
+
 void setup(){
   fullScreen();
   pixelDensity(displayDensity());
@@ -77,6 +79,7 @@ void mousePressed(){
   if(pressedString.equals(new String(sequence)) && (trials<30)){
     startExperiment();
   }else{
+    writeResultsToFile();
     //TODO
   }
 }
@@ -123,8 +126,12 @@ void startExperiment(){
 Long getID(){
   double xNew = keyPositions.get(sequence[sequencePosition]).getPosX(); 
   double yNew = keyPositions.get(sequence[sequencePosition]).getPosY();
-  double xOld = keyPositions.get(sequence[sequencePosition-1]).getPosX(); //TODO Was wenn 1. sequencepos???
-  double yOld = keyPositions.get(sequence[sequencePosition-1]).getPosY();      
+  double xOld = 0; //TODO Was wenn 1. sequencepos???
+  double yOld = 0;
+  if(sequence[sequencePosition]==1){
+    xOld = keyPositions.get(sequence[sequencePosition-1]).getPosX(); 
+    yOld = keyPositions.get(sequence[sequencePosition-1]).getPosY(); 
+  }
   double d = Math.sqrt((yOld - yNew) * (yOld - yNew) + (xOld - xNew) * (xOld - xNew));    
   Long iD = (long)(Math.log((1+(d/40))/Math.log(2)));
   return iD;
@@ -134,4 +141,16 @@ Long getMT(){
   Integer b= 150; //ms/bit
   Long MT = a+b*this.getID();  
   return MT;
+}
+void writeResultsToFile() {
+  int counter = 1;
+  Iterator<Long> MTIterator = MTlist.iterator();
+  Iterator<Long> IDIterator = IDlist.iterator();
+  outputFile.println("iteration  " + "MTI  " + "ID  ");
+  while (MTIterator.hasNext()) {
+    outputFile.println(counter + "  " + MTIterator.next() + "  " + IDIterator.next());
+    counter++;
+  }
+  outputFile.flush();
+  outputFile.close();
 }
