@@ -67,7 +67,7 @@ void initKeyboard(){
 void mousePressed(){
   lastPressedChar = getPressedCharacter();
   if(lastPressedChar == sequence[sequencePosition]){
-    IDlist.add(getID());
+    IDlist.add(getID()); //Aufruf auf was?
     MTlist.add(getMT());
     timestamp=System.currentTimeMillis();
     sequencePosition++;
@@ -121,10 +121,17 @@ void startExperiment(){
   trials++;
 }
 Long getID(){
-  Long ID = null;  //TODO
-  return ID;
+  double xNew = keyPositions.get(sequence[sequencePosition]).getPosX(); 
+  double yNew = keyPositions.get(sequence[sequencePosition]).getPosY();
+  double xOld = keyPositions.get(sequence[sequencePosition-1]).getPosX(); //TODO Was wenn 1. sequencepos???
+  double yOld = keyPositions.get(sequence[sequencePosition-1]).getPosY();      
+  double d = Math.sqrt((yOld - yNew) * (yOld - yNew) + (xOld - xNew) * (xOld - xNew));    
+  Long iD = (long)(Math.log((1+(d/40))/Math.log(2)));
+  return iD;
 }
 Long getMT(){
-  Long MT = null;  //TODO
+  Integer a= 0; //ms
+  Integer b= 150; //ms/bit
+  Long MT = a+b*this.getID();  
   return MT;
 }
