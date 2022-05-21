@@ -18,6 +18,7 @@ void setup(){
   keyPositions = new HashMap();
   experimentActive = false;
   trials = 0;
+  outputFile = createWriter("results.txt");
 }
 
 void draw(){
@@ -76,7 +77,7 @@ void mousePressed(){
     pressedString = pressedString + lastPressedChar.toString();
   }
   
-  if(pressedString.equals(new String(sequence)) && (trials<30)){
+  if(pressedString.equals(new String(sequence)) && (trials<20)){
     startExperiment();
   }else{
     writeResultsToFile();
