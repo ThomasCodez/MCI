@@ -35,7 +35,7 @@ void draw(){
   if(!experimentActive){
   startExperiment();
   }
-  text("Trials: " + trials + "/30", 50,200);
+  text("Trials: " + trials + "/20", 50,200);
   text("Type: " + new String(sequence), 50, 220);
   text("Already typed: " + pressedString, 50, 240);
 }
@@ -107,7 +107,6 @@ void mousePressed(){
     startExperiment();
   }else{
     writeResultsToFile();
-    //TODO
   }
 }
 
