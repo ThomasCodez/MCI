@@ -6,12 +6,14 @@ boolean experimentActive;
 char[] sequence;
 String pressedString;
 int trials;
-ArrayList<Long> IDlist = new ArrayList();
+ArrayList<Double> IDlist = new ArrayList();
 ArrayList<Long> MTlist = new ArrayList();
 ArrayList<Character> optimalKeys = new ArrayList();
-long timestamp;
+long timeStamp;
 PrintWriter outputFile;
 
+
+Boolean hasStopped;
 void setup(){
   fullScreen();
   pixelDensity(displayDensity());
@@ -21,6 +23,7 @@ void setup(){
   trials = 0;
   outputFile = createWriter("results.txt");
   initKeys();
+  hasStopped = false;
 }
 
 void draw(){
@@ -35,9 +38,20 @@ void draw(){
   if(!experimentActive){
   startExperiment();
   }
+  
+  if(trials == 21 || hasStopped){
+    writeResultsToFile();
+    System.exit(0);
+  }
   text("Trials: " + trials + "/20", 50,200);
   text("Type: " + new String(sequence), 50, 220);
   text("Already typed: " + pressedString, 50, 240);
+}
+
+void keyPressed(){
+  if(key == ' '){
+    hasStopped = true;
+  }
 }
 void initKeys(){
   optimalKeys.add('q');
@@ -78,7 +92,7 @@ void initKeyboard(){
     for(int j = 0; j<10; j++){
       noFill();
       stroke(153);
-      if(iterator != 19 && iterator <= 28 ){
+      if(iterator != 19 && iterator <= 29 ){
        rect(j * 50 + 50, i * 50 + 50, 40,40);  
        currentChar = charIterator.next();
        text(currentChar, j* 50 + 65, i*50 + 60);
@@ -100,17 +114,15 @@ void mousePressed(){
   }
   if(lastPressedChar == sequence[sequencePosition]){
     IDlist.add(getID());
-    MTlist.add(getMT());
-    timestamp=System.currentTimeMillis();
+    long deltaTime = System.currentTimeMillis() - timeStamp;
+    MTlist.add(deltaTime);
+    timeStamp=System.currentTimeMillis();
     sequencePosition++;
     pressedString = pressedString + lastPressedChar.toString();
   }
   
   if(pressedString.equals(new String(sequence)) && (trials<20)){
     startExperiment();
-  }else{
-    writeResultsToFile();
-    //TODO
   }
 }
 
@@ -149,33 +161,26 @@ void startExperiment(){
   sequence = generateSequence();
   sequencePosition = 0;
   experimentActive = true;
-  timestamp = System.currentTimeMillis();
+  timeStamp = System.currentTimeMillis();
   pressedString = "";
   trials++;
 }
-Long getID(){
-  double xNew = keyPositions.get(sequence[sequencePosition]).getPosX(); 
-  double yNew = keyPositions.get(sequence[sequencePosition]).getPosY();
-  double xOld = keyPositions.get('g').getPosX();
-  double yOld = keyPositions.get('g').getPosY();
+double getID(){
+  double xNew = keyPositions.get(sequence[sequencePosition]).getPosX() + 20; 
+  double yNew = keyPositions.get(sequence[sequencePosition]).getPosY() + 20;
+  double xOld = keyPositions.get('g').getPosX() + 20;
+  double yOld = keyPositions.get('g').getPosY() + 20;
   if(sequence[sequencePosition]==1){
     xOld = keyPositions.get(sequence[sequencePosition-1]).getPosX(); 
     yOld = keyPositions.get(sequence[sequencePosition-1]).getPosY(); 
   }
   double d = Math.sqrt((yOld - yNew) * (yOld - yNew) + (xOld - xNew) * (xOld - xNew));    
-  Long iD = (long)(Math.log((1+(d/40))/Math.log(2)));
-  return iD;
-}
-Long getMT(){
-  Integer a= 0; //ms
-  Integer b= 150; //ms/bit
-  Long MT = a+b*this.getID();  
-  return MT;
+  return (Math.log((1+(d/40))/Math.log(2)));
 }
 void writeResultsToFile() {
   int counter = 1;
   Iterator<Long> MTIterator = MTlist.iterator();
-  Iterator<Long> IDIterator = IDlist.iterator();
+  Iterator<Double> IDIterator = IDlist.iterator();
   outputFile.println("iteration  " + "MTI  " + "ID  ");
   while (MTIterator.hasNext()) {
     outputFile.println(counter + "  " + MTIterator.next() + "  " + IDIterator.next());
