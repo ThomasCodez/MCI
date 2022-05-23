@@ -39,7 +39,7 @@ void draw(){
   startExperiment();
   }
   
-  if(trials == 21 || hasStopped){
+  if(pressedString.equals(new String(sequence)) && (trials==20) || hasStopped){
     writeResultsToFile();
     System.exit(0);
   }
