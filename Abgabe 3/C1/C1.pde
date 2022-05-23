@@ -6,11 +6,14 @@ boolean experimentActive;
 char[] sequence;
 String pressedString;
 int trials;
-ArrayList<Long> IDlist = new ArrayList();
+ArrayList<Double> IDlist = new ArrayList();
 ArrayList<Long> MTlist = new ArrayList();
-long timestamp;
+ArrayList<Character> optimalKeys = new ArrayList();
+long timeStamp;
 PrintWriter outputFile;
 
+
+Boolean hasStopped;
 void setup(){
   fullScreen();
   pixelDensity(displayDensity());
@@ -19,6 +22,8 @@ void setup(){
   experimentActive = false;
   trials = 0;
   outputFile = createWriter("results.txt");
+  initKeys();
+  hasStopped = false;
 }
 
 void draw(){
@@ -33,11 +38,52 @@ void draw(){
   if(!experimentActive){
   startExperiment();
   }
+  
+  if(trials == 21 || hasStopped){
+    writeResultsToFile();
+    System.exit(0);
+  }
   text("Trials: " + trials + "/20", 50,200);
   text("Type: " + new String(sequence), 50, 220);
   text("Already typed: " + pressedString, 50, 240);
 }
 
+void keyPressed(){
+  if(key == ' '){
+    hasStopped = true;
+  }
+}
+void initKeys(){
+  optimalKeys.add('q');
+  optimalKeys.add('w');
+  optimalKeys.add('e');
+  optimalKeys.add('r');
+  optimalKeys.add('t');
+  optimalKeys.add('z');
+  optimalKeys.add('u');
+  optimalKeys.add('i');
+  optimalKeys.add('o');
+  optimalKeys.add('p');
+  optimalKeys.add('a');
+  optimalKeys.add('s');
+  optimalKeys.add('d');
+  optimalKeys.add('f');
+  optimalKeys.add('g');
+  optimalKeys.add('h');
+  optimalKeys.add('j');
+  optimalKeys.add('k');
+  optimalKeys.add('l');
+  optimalKeys.add('y');
+  optimalKeys.add('x');
+  optimalKeys.add('c');
+  optimalKeys.add('v');
+  optimalKeys.add('b');
+  optimalKeys.add('n');
+  optimalKeys.add('m');
+  optimalKeys.add(',');
+  optimalKeys.add('.');
+  optimalKeys.add(' ');
+}
 void initKeyboard(){
   char currentChar;
   int iterator = 0;
@@ -65,23 +111,26 @@ void initKeyboard(){
     }
   }
   
+
+
 }
 
 void mousePressed(){
   lastPressedChar = getPressedCharacter();
+  if(lastPressedChar == null){
+    return;
+  }
   if(lastPressedChar == sequence[sequencePosition]){
-    IDlist.add(getID()); //Aufruf auf was?
-    MTlist.add(getMT());
-    timestamp=System.currentTimeMillis();
+    IDlist.add(getID());
+    long deltaTime = System.currentTimeMillis() - timeStamp;
+    MTlist.add(deltaTime);
+    timeStamp=System.currentTimeMillis();
     sequencePosition++;
     pressedString = pressedString + lastPressedChar.toString();
   }
   
   if(pressedString.equals(new String(sequence)) && (trials<20)){
     startExperiment();
-  }else{
-    writeResultsToFile();
-    //TODO
   }
 }
 
@@ -120,33 +169,26 @@ void startExperiment(){
   sequence = generateSequence();
   sequencePosition = 0;
   experimentActive = true;
-  timestamp = System.currentTimeMillis();
+  timeStamp = System.currentTimeMillis();
   pressedString = "";
   trials++;
 }
-Long getID(){
-  double xNew = keyPositions.get(sequence[sequencePosition]).getPosX(); 
-  double yNew = keyPositions.get(sequence[sequencePosition]).getPosY();
-  double xOld = 0; //TODO Was wenn 1. sequencepos???
-  double yOld = 0;
+double getID(){
+  double xNew = keyPositions.get(sequence[sequencePosition]).getPosX() + 20; 
+  double yNew = keyPositions.get(sequence[sequencePosition]).getPosY() + 20;
+  double xOld = keyPositions.get('g').getPosX() + 20;
+  double yOld = keyPositions.get('g').getPosY() + 20;
   if(sequence[sequencePosition]==1){
     xOld = keyPositions.get(sequence[sequencePosition-1]).getPosX(); 
     yOld = keyPositions.get(sequence[sequencePosition-1]).getPosY(); 
   }
   double d = Math.sqrt((yOld - yNew) * (yOld - yNew) + (xOld - xNew) * (xOld - xNew));    
-  Long iD = (long)(Math.log((1+(d/40))/Math.log(2)));
-  return iD;
-}
-Long getMT(){
-  Integer a= 0; //ms
-  Integer b= 150; //ms/bit
-  Long MT = a+b*this.getID();  
-  return MT;
+  return (Math.log((1+(d/40))/Math.log(2)));
 }
 void writeResultsToFile() {
   int counter = 1;
   Iterator<Long> MTIterator = MTlist.iterator();
-  Iterator<Long> IDIterator = IDlist.iterator();
+  Iterator<Double> IDIterator = IDlist.iterator();
   outputFile.println("iteration  " + "MTI  " + "ID  ");
   while (MTIterator.hasNext()) {
     outputFile.println(counter + "  " + MTIterator.next() + "  " + IDIterator.next());
