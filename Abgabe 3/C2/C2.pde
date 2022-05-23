@@ -95,8 +95,11 @@ void initKeyboard(){
 
 void mousePressed(){
   lastPressedChar = getPressedCharacter();
+  if(lastPressedChar == null){
+    return;
+  }
   if(lastPressedChar == sequence[sequencePosition]){
-    IDlist.add(getID()); //Aufruf auf was?
+    IDlist.add(getID());
     MTlist.add(getMT());
     timestamp=System.currentTimeMillis();
     sequencePosition++;
@@ -107,6 +110,7 @@ void mousePressed(){
     startExperiment();
   }else{
     writeResultsToFile();
+    //TODO
   }
 }
 
@@ -152,8 +156,8 @@ void startExperiment(){
 Long getID(){
   double xNew = keyPositions.get(sequence[sequencePosition]).getPosX(); 
   double yNew = keyPositions.get(sequence[sequencePosition]).getPosY();
-  double xOld = 0; //TODO Was wenn 1. sequencepos???
-  double yOld = 0;
+  double xOld = keyPositions.get('g').getPosX();
+  double yOld = keyPositions.get('g').getPosY();
   if(sequence[sequencePosition]==1){
     xOld = keyPositions.get(sequence[sequencePosition-1]).getPosX(); 
     yOld = keyPositions.get(sequence[sequencePosition-1]).getPosY(); 
